@@ -1,0 +1,11 @@
+perubahan pertama
+ilangin game mode, setting di always easy
+gausah pake bgm, tombol setting isinya cuma fix size sesuai yang di ingingan : windowed, fullscreen
+css make tailwind
+akmal bikin cpu
+icang bikin gamestate
+hazwan bikin game engine
+akmal ngurus css
+icang templates
+hazwan routing flask
+board 3x3
