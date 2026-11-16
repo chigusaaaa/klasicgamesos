@@ -5,7 +5,7 @@ Pakai:  python3 keygen.py "Nama Pembeli"
 """
 import sys
 
-from sos_plus import make_key
+from main import make_key
 
 if len(sys.argv) < 2:
     sys.exit('Pakai: python3 keygen.py "Nama Pembeli"')
