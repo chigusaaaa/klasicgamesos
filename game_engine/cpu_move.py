@@ -1,80 +1,80 @@
 import random
 
-# Definisi simbol untuk CPU dan Player
-CPU = "🤖"
-PLAYER = "😎"
-
 def hitung_sos(papan, baris, kolom, emoji):
     """
-    Menghitung apakah penempatan `emoji` di (baris, kolom) 
-    membentuk 3 simbol sejajar yang sama (😎😎😎 atau 🤖🤖🤖).
+    Menghitung berapa banyak pola 'S-O-S' yang terbentuk 
+    jika `emoji` ('❌' atau '⭕') diletakkan pada posisi papan[baris][kolom].
     """
     ukuran = len(papan)
     papan[baris][kolom] = emoji
-    jumlah_poin = 0
+    jumlah_sos = 0
 
-    # Arah pemeriksaan: Vertikal, Horizontal, Diagonal Utama (\), Diagonal Sekunder (/)
-    pasangan_arah = [
-        ((-1, 0), (1, 0)),    # Vertikal
-        ((0, -1), (0, 1)),    # Horizontal
-        ((-1, -1), (1, 1)),   # Diagonal Utama
-        ((-1, 1), (1, -1))    # Diagonal Sekunder
+    # 8 arah vektor pergerakan: (baris, kolom)
+    arah = [
+        (-1, 0), (1, 0),   # Vertikal (atas, bawah)
+        (0, -1), (0, 1),   # Horizontal (kiri, kanan)
+        (-1, -1), (1, 1),  # Diagonal utama
+        (-1, 1), (1, -1)   # Diagonal sekunder
     ]
 
-    # 1. Cek jika sel ini menjadi TENGAH dari 3 simbol sejajar 
-    for (dr1, dc1), (dr2, dc2) in pasangan_arah:
-        r1, c1 = baris + dr1, kolom + dc1
-        r2, c2 = baris + dr2, kolom + dc2
-        if 0 <= r1 < ukuran and 0 <= c1 < ukuran and 0 <= r2 < ukuran and 0 <= c2 < ukuran:
-            if papan[r1][c1] == emoji and papan[r2][c2] == emoji:
-                jumlah_poin += 1
+    # Jika emoji yang dipasang adalah '❌' (Berada di Ujung Pola: ❌ - ⭕ - ❌)
+    if emoji == "❌":
+        for dr, dc in arah:
+            r1, c1 = baris + dr, kolom + dc
+            r2, c2 = baris + 2 * dr, kolom + 2 * dc
+            if 0 <= r1 < ukuran and 0 <= c1 < ukuran and 0 <= r2 < ukuran and 0 <= c2 < ukuran:
+                if papan[r1][c1] == "⭕" and papan[r2][c2] == "❌":
+                    jumlah_sos += 1
 
-    # 2. Cek jika sel ini menjadi UJUNG dari 3 simbol sejajar 
-    arah_tunggal = [
-        (-1, 0), (1, 0), (0, -1), (0, 1),
-        (-1, -1), (1, 1), (-1, 1), (1, -1)
-    ]
-    for dr, dc in arah_tunggal:
-        r1, c1 = baris + dr, kolom + dc
-        r2, c2 = baris + 2 * dr, kolom + 2 * dc
-        if 0 <= r1 < ukuran and 0 <= c1 < ukuran and 0 <= r2 < ukuran and 0 <= c2 < ukuran:
-            if papan[r1][c1] == emoji and papan[r2][c2] == emoji:
-                jumlah_poin += 1
+    # Jika emoji yang dipasang adalah '⭕' (Berada di Tengah Pola: ❌ - ⭕ - ❌)
+    elif emoji == "⭕":
+        pasangan_arah = [
+            ((-1, 0), (1, 0)),    # Vertikal
+            ((0, -1), (0, 1)),    # Horizontal
+            ((-1, -1), (1, 1)),   # Diagonal utama
+            ((-1, 1), (1, -1))    # Diagonal sekunder
+        ]
+        for (dr1, dc1), (dr2, dc2) in pasangan_arah:
+            r1, c1 = baris + dr1, kolom + dc1
+            r2, c2 = baris + dr2, kolom + dc2
+            if 0 <= r1 < ukuran and 0 <= c1 < ukuran and 0 <= r2 < ukuran and 0 <= c2 < ukuran:
+                if papan[r1][c1] == "❌" and papan[r2][c2] == "❌":
+                    jumlah_sos += 1
 
+    # Kembalikan isi sel ke kondisi kosong semula
     papan[baris][kolom] = " "
-    return jumlah_poin
+    return jumlah_sos
 
 
-def pilih_langkah_cpu(papan, emoji_cpu=CPU, emoji_player=PLAYER):
+def pilih_langkah_cpu(papan):
     """
-    Strategi CPU:
-    1. ATTACK  : Cari sel yang bisa membuat 3 🤖 sejajar.
-    2. DEFENSE : Blokir sel yang bisa membuat Player mendapat 3 😎 sejajar.
-    3. RANDOM  : Pilih sel acak.
+    Strategi CPU untuk Aturan Game SOS:
+    1. ATTACK (Smart Move): Cari sel kosong dan emoji ('❌' atau '⭕') 
+       yang langsung bisa mencetak poin SOS.
+    2. RANDOM: Jika tidak ada peluang SOS, pilih sel dan emoji ('❌'/'⭕') secara acak.
+    
+    Mengembalikan tuple 4 nilai: (baris, kolom, emoji, jumlah_sos)
     """
     ukuran = len(papan)
     sel_kosong = []
 
+    # 1. Kumpulkan seluruh koordinat sel kosong
     for r in range(ukuran):
         for c in range(ukuran):
-            if papan[r][c] == " ":
+            if papan[r][c] == " " or papan[r][c] == "":
                 sel_kosong.append((r, c))
 
     if not sel_kosong:
         return None
 
-    # Prioritas 1: ATTACK (Poin untuk CPU)
+    # 2. Prioritas Utama: Uji setiap sel kosong dengan emoji '❌' dan '⭕'
     for r, c in sel_kosong:
-        poin_cpu = hitung_sos(papan, r, c, emoji_cpu)
-        if poin_cpu > 0:
-            return r, c, emoji_cpu, poin_cpu
+        for emoji in ["❌", "⭕"]:
+            sos_terbentuk = hitung_sos(papan, r, c, emoji)
+            if sos_terbentuk > 0:
+                return r, c, emoji, sos_terbentuk
 
-    # Prioritas 2: DEFENSE (Blokir Poin Player)
-    for r, c in sel_kosong:
-        poin_player = hitung_sos(papan, r, c, emoji_player)
-        if poin_player > 0:
-            return r, c, emoji_cpu, 0
-
-    # Prioritas 3: RANDOM
+    # 3. Prioritas Kedua: Jika belum ada peluang SOS, pilih sel & emoji secara acak
     r, c = random.choice(sel_kosong)
-    return r, c, emoji_cpu, 0
+    emoji = random.choice(["❌", "⭕"])
+    return r, c, emoji, 0
