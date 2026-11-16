@@ -1,5 +1,8 @@
 import random
 
+PLAYER = "❌"
+CPU = "⭕"
+
 def hitung_sos(papan, baris, kolom, emoji):
     """
     Menghitung berapa banyak pola 'S-O-S' yang terbentuk 
