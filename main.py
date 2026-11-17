@@ -4,7 +4,7 @@ import hmac
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "game_engine"))
 
-from board import Board
+import board
 import game_state as gs
 import cpu_move
 
@@ -84,7 +84,7 @@ def main():
     verifikasi_lisensi()
 
     gs.reset_game()
-    b = Board(gs.ukuran_papan)
+    b = board.Board(gs.ukuran_papan)
 
     while gs.status == "berlangsung":
         s = gs.ambil_status()
